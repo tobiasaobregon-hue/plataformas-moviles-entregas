@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Editor de Texto - DOM y JavaScript</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+        integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT"
+        crossorigin="anonymous">
+</head>
+
+<body>
+
+    <div class="container my-1 my-sm-2 my-md-4 my-lg-5">
+
+        <h1>Editor de Texto</h1>
+
+        <div class="card">
+            <div class="card-body">
+
+                <h2>Texto</h2>
+
+                <p class="texto" id="texto">
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec elementum auctor libero, vel imperdiet est. Etiam blandit facilisis ex, nec cursus metus pharetra quis. Fusce imperdiet nisl nibh, ac aliquet ante elementum vitae.
+                </p>
+
+                <hr class="hr">
+
+                <h2>Editar texto</h2>
+
+                <input
+                    type="text"
+                    id="input-texto"
+                    class="form-control"
+                    placeholder="Escribí tu texto"
+                >
+
+                <hr>
+
+                <h2>Opciones de Formato</h2>
+
+                <div class="row">
+
+                    <div class="col-12 col-md-4 my-1">
+                        <button
+                            id="btn-negrita"
+                            class="btn d-block w-100 btn-primary"
+                            data-formato="negrita">
+                            Bold (Negrita)
+                        </button>
+                    </div>
+
+                    <div class="col-12 col-md-4 my-1">
+                        <button
+                            id="btn-cursiva"
+                            class="btn d-block w-100 btn-primary"
+                            data-formato="cursiva">
+                            Italic (Cursiva)
+                        </button>
+                    </div>
+
+                    <div class="col-12 col-md-4 my-1">
+                        <button
+                            id="btn-subrayado"
+                            class="btn d-block w-100 btn-primary"
+                            data-formato="subrayado">
+                            Underline (Subrayado)
+                        </button>
+                    </div>
+
+                    <div class="col-12 col-md-4 my-1">
+                        <button
+                            id="btn-color"
+                            class="btn d-block w-100 btn-primary">
+                            Cambiar color
+                        </button>
+                    </div>
+
+                    <div class="col-12 col-md-4 my-1">
+                        <button
+                            id="btn-tamaño"
+                            class="btn d-block w-100 btn-primary">
+                            Aumentar tamaño
+                        </button>
+                    </div>
+
+                    <div class="col-12 col-md-4 my-1">
+                        <button
+                            id="btn-restaurar"
+                            class="btn d-block w-100 btn-secondary">
+                            Restaurar
+                        </button>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-j1CDi7MgGQ12Z7Qab0qlWQ/Qqz24Gc6BM0thvEMVjHnfYGF0rmFCozFSxQBxwHKO"
+        crossorigin="anonymous">
+    </script>
+
+
+    <script type="text/javascript">
+
+        // Elemento donde aparece el texto
+        const texto = document.querySelector("#texto");
+
+        // Input para modificar el texto
+        const inputTexto = document.querySelector("#input-texto");
+
+
+        /**
+         * funcionNegrita()
+         * Activa o desactiva la negrita.
+         */
+        function funcionNegrita() {
+
+            if (texto.style.fontWeight === "bold") {
+
+                texto.style.fontWeight = "normal";
+
+                document.querySelector("#btn-negrita").textContent =
+                    "Bold (Desactivado)";
+
+            } else {
+
+                texto.style.fontWeight = "bold";
+
+                document.querySelector("#btn-negrita").textContent =
+                    "Bold (Activado)";
+            }
+        }
+
+
+        /**
+         * funcionCursiva()
+         * Activa o desactiva la cursiva.
+         */
+        function funcionCursiva() {
+
+            if (texto.style.fontStyle === "italic") {
+
+                texto.style.fontStyle = "normal";
+
+                document.querySelector("#btn-cursiva").textContent =
+                    "Italic (Desactivado)";
+
+            } else {
+
+                texto.style.fontStyle = "italic";
+
+                document.querySelector("#btn-cursiva").textContent =
+                    "Italic (Activado)";
+            }
+        }
+
+
+        /**
+         * funcionSubrayado()
+         * Activa o desactiva el subrayado.
+         */
+        function funcionSubrayado() {
+
+            if (texto.style.textDecoration === "underline") {
+
+                texto.style.textDecoration = "none";
+
+                document.querySelector("#btn-subrayado").textContent =
+                    "Underline (Desactivado)";
+
+            } else {
+
+                texto.style.textDecoration = "underline";
+
+                document.querySelector("#btn-subrayado").textContent =
+                    "Underline (Activado)";
+            }
+        }
+
+
+        /**
+         * Cambiar color
+         */
+        function cambiarColor() {
+
+            if (texto.style.color === "red") {
+
+                texto.style.color = "black";
+
+                document.querySelector("#btn-color").textContent =
+                    "Cambiar color";
+
+            } else {
+
+                texto.style.color = "red";
+
+                document.querySelector("#btn-color").textContent =
+                    "Color activado";
+            }
+        }
+
+
+        /**
+         * Cambiar tamaño
+         */
+        function cambiarTamaño() {
+
+            let tamañoActual = parseInt(
+                window.getComputedStyle(texto).fontSize
+            );
+
+            texto.style.fontSize = (tamañoActual + 2) + "px";
+        }
+
+
+        /**
+         * Editar texto
+         */
+        inputTexto.addEventListener("input", function() {
+
+            texto.textContent = inputTexto.value;
+
+        });
+
+
+        /**
+         * Restaurar texto
+         */
+        function restaurar() {
+
+            texto.textContent =
+                "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec elementum auctor libero, vel imperdiet est. Etiam blandit facilisis ex, nec cursus metus pharetra quis. Fusce imperdiet nisl nibh, ac aliquet ante elementum vitae.";
+
+            texto.style.fontWeight = "normal";
+            texto.style.fontStyle = "normal";
+            texto.style.textDecoration = "none";
+            texto.style.color = "black";
+            texto.style.fontSize = "";
+
+            inputTexto.value = "";
+
+            document.querySelector("#btn-negrita").textContent =
+                "Bold (Negrita)";
+
+            document.querySelector("#btn-cursiva").textContent =
+                "Italic (Cursiva)";
+
+            document.querySelector("#btn-subrayado").textContent =
+                "Underline (Subrayado)";
+
+            document.querySelector("#btn-color").textContent =
+                "Cambiar color";
+        }
+
+
+        /**
+         * Handler de los botones originales
+         */
+        function handlerBoton(e) {
+
+            const funcionBoton = e.target.dataset.formato;
+
+            switch (funcionBoton) {
+
+                case 'negrita':
+                    funcionNegrita();
+                    break;
+
+                case 'cursiva':
+                    funcionCursiva();
+                    break;
+
+                case 'subrayado':
+                    funcionSubrayado();
+                    break;
+            }
+        }
+
+
+        // Botones originales
+        document
+            .querySelectorAll('button[data-formato]')
+            .forEach(e => e.addEventListener('click', handlerBoton));
+
+
+        // Botón color
+        document
+            .querySelector("#btn-color")
+            .addEventListener("click", cambiarColor);
+
+
+        // Botón tamaño
+        document
+            .querySelector("#btn-tamaño")
+            .addEventListener("click", cambiarTamaño);
+
+
+        // Botón restaurar
+        document
+            .querySelector("#btn-restaurar")
+            .addEventListener("click", restaurar);
+
+    </script>
+
+</body>
+</html>
