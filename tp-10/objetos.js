@@ -1,4 +1,4 @@
-```js
+
 var personaEjemplo = {
     "apellido": "Perez",
     "nombre": "Juan",
