@@ -5,9 +5,7 @@ var personaEjemplo = {
     documento: 12345
 };
 
-/**
- * 01 - crearPersona
- */
+// 01 - crearPersona
 function crearPersona(nombre, apellido, edad, documento) {
     return {
         nombre: nombre,
@@ -17,83 +15,70 @@ function crearPersona(nombre, apellido, edad, documento) {
     };
 }
 
-console.log(
-    "resultado crearPersona: ",
+console.log("resultado crearPersona: ",
     crearPersona("Juan", "Pérez", 20, 123456)
 );
 
-/**
- * 02 - agregarApodo
- */
+
+// 02 - agregarApodo
 function agregarApodo(persona, apodo) {
     persona.apodo = apodo;
     return persona;
 }
 
-console.log(
-    "resultado agregarApodo: ",
+console.log("resultado agregarApodo: ",
     agregarApodo(personaEjemplo, "JuanPe")
 );
 
-/**
- * 03 - sinDocumento
- */
+
+// 03 - sinDocumento
 function sinDocumento(persona) {
     delete persona.documento;
     return persona;
 }
 
-console.log(
-    "resultado sinDocumento: ",
+console.log("resultado sinDocumento: ",
     sinDocumento(personaEjemplo)
 );
 
-/**
- * 04 - tieneDocumento
- */
+
+// 04 - tieneDocumento
 function tieneDocumento(persona) {
     return "documento" in persona;
 }
 
-console.log(
-    "resultado tieneDocumento: ",
+console.log("resultado tieneDocumento: ",
     tieneDocumento(personaEjemplo)
 );
 
-/**
- * 05 - nombreCompletoDePersona
- */
+
+// 05 - nombreCompletoDePersona
 function nombreCompletoDePersona(persona) {
     return persona.apellido + ", " + persona.nombre;
 }
 
-console.log(
-    "resultado nombreCompletoDePersona: ",
+console.log("resultado nombreCompletoDePersona: ",
     nombreCompletoDePersona(personaEjemplo)
 );
 
-/**
- * 06 - felizCumpleaños
- */
+
+// 06 - felizCumpleaños
 function felizCumpleaños(persona) {
     persona.edad = persona.edad + 1;
     return persona;
 }
 
-console.log(
-    "resultado felizCumpleaños: ",
+console.log("resultado felizCumpleaños: ",
     felizCumpleaños(personaEjemplo)
 );
 
-/**
- * 07 - sonLaMismaPersona
- */
+
+// 07 - sonLaMismaPersona
 function sonLaMismaPersona(persona1, persona2) {
     return persona1.documento === persona2.documento;
 }
 
-console.log(
-    "resultado sonLaMismaPersona: ",
+console.log("resultado sonLaMismaPersona: ",
     sonLaMismaPersona(
         {
             apellido: "Perez",
@@ -110,9 +95,8 @@ console.log(
     )
 );
 
-/**
- * 08 - personaMasGrande
- */
+
+// 08 - personaMasGrande
 function personaMasGrande(persona1, persona2) {
     if (persona1.edad >= persona2.edad) {
         return persona1;
@@ -121,8 +105,7 @@ function personaMasGrande(persona1, persona2) {
     }
 }
 
-console.log(
-    "resultado personaMasGrande: ",
+console.log("resultado personaMasGrande: ",
     personaMasGrande(
         {
             nombre: "Ana",
