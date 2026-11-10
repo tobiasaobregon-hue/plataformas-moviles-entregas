@@ -1,282 +1,394 @@
-const listaPokemon = document.querySelector("#lista-pokemon");
-const spinner = document.querySelector("#spinner");
-const mensajeError = document.querySelector("#mensaje-error");
-const btnCargarMas = document.querySelector("#btn-cargar-mas");
 
-const modalPokemon = new bootstrap.Modal(
-    document.querySelector("#modalPokemon")
-);
+// ==========================================
+// CONFIGURACION INICIAL
+// ==========================================
 
-const modalContenido = document.querySelector("#modal-contenido");
-const modalTitulo = document.querySelector("#modalPokemonLabel");
+const API_URL = "https://pokeapi.co/api/v2/pokemon/";
+
+const contenedor = document.getElementById("contenedor-pokemon");
+const spinner = document.getElementById("spinner");
+const botonMas = document.getElementById("btn-cargar-mas");
+const buscador = document.getElementById("buscador");
+const mensajeError = document.getElementById("mensaje-error");
 
 let cantidadPokemon = 151;
-let offset = 0;
+let pokemonCargados = [];
+let cargando = false;
 
 
-// Mostrar spinner
+// ==========================================
+// COLORES DE LOS TIPOS
+// ==========================================
+
+const coloresTipos = {
+    normal: "#A8A77A",
+    fire: "#EE8130",
+    water: "#6390F0",
+    electric: "#F7D02C",
+    grass: "#7AC74C",
+    ice: "#96D9D6",
+    fighting: "#C22E28",
+    poison: "#A33EA1",
+    ground: "#E2BF65",
+    flying: "#A98FF3",
+    psychic: "#F95587",
+    bug: "#A6B91A",
+    rock: "#B6A136",
+    ghost: "#735797",
+    dragon: "#6F35FC",
+    dark: "#705746",
+    steel: "#B7B7CE",
+    fairy: "#D685AD"
+};
+
+
+// ==========================================
+// MOSTRAR SPINNER
+// ==========================================
+
 function mostrarSpinner() {
     spinner.classList.remove("d-none");
+    botonMas.disabled = true;
 }
 
-
-// Ocultar spinner
 function ocultarSpinner() {
     spinner.classList.add("d-none");
+    botonMas.disabled = false;
 }
 
 
-// Obtener Pokémon de la API
-async function obtenerPokemon() {
+// ==========================================
+// CARGAR POKEMON DESDE LA API
+// ==========================================
 
+async function cargarPokemon() {
+
+    if (cargando) return;
+
+    cargando = true;
     mostrarSpinner();
     mensajeError.classList.add("d-none");
+    botonMas.classList.add("d-none");
 
     try {
 
         const respuesta = await fetch(
-            `https://pokeapi.co/api/v2/pokemon?limit=${cantidadPokemon}&offset=${offset}`
+            `${API_URL}?limit=${cantidadPokemon}&offset=0`
         );
 
         if (!respuesta.ok) {
-            throw new Error("Error al obtener los Pokémon");
+            throw new Error("Error al consultar la API");
         }
 
         const datos = await respuesta.json();
 
-        const detallesPokemon = await Promise.all(
-            datos.results.map(function (pokemon) {
-                return obtenerDetallePokemon(pokemon.url);
+        // Obtener información completa de cada Pokémon
+        const resultados = await Promise.all(
+            datos.results.map(async (pokemon) => {
+
+                const respuestaPokemon = await fetch(pokemon.url);
+
+                if (!respuestaPokemon.ok) {
+                    throw new Error("Error al obtener un Pokémon");
+                }
+
+                return await respuestaPokemon.json();
+
             })
         );
 
-        detallesPokemon.forEach(function (pokemon) {
-            crearCartaPokemon(pokemon);
-        });
+        pokemonCargados = resultados;
 
-        offset += cantidadPokemon;
+        mostrarPokemon(pokemonCargados);
+
+        botonMas.classList.remove("d-none");
 
     } catch (error) {
 
-        console.error(error);
+        console.error("Error:", error);
 
         mensajeError.classList.remove("d-none");
 
     } finally {
 
         ocultarSpinner();
+        cargando = false;
+
     }
+
 }
 
 
-// Obtener información detallada
-async function obtenerDetallePokemon(url) {
+// ==========================================
+// MOSTRAR TARJETAS DE POKEMON
+// ==========================================
 
-    const respuesta = await fetch(url);
+function mostrarPokemon(lista) {
 
-    if (!respuesta.ok) {
-        throw new Error("No se pudo obtener el Pokémon");
-    }
+    contenedor.innerHTML = "";
 
-    return await respuesta.json();
-}
+    if (lista.length === 0) {
 
-
-// Crear carta
-function crearCartaPokemon(pokemon) {
-
-    const columna = document.createElement("div");
-
-    columna.classList.add(
-        "col-12",
-        "col-sm-6",
-        "col-md-4",
-        "col-lg-3"
-    );
-
-    const tipos = pokemon.types.map(function (tipo) {
-
-        return `
-            <span class="tipo">
-                ${tipo.type.name}
-            </span>
+        contenedor.innerHTML = `
+            <div class="col-12 text-center">
+                <h4>No se encontraron Pokémon.</h4>
+            </div>
         `;
 
-    }).join("");
+        return;
+    }
 
+    lista.forEach(pokemon => {
 
-    columna.innerHTML = `
+        const tipos = pokemon.types.map(tipo => {
 
-        <div class="card card-pokemon shadow-sm">
-
-            <img
-                src="${pokemon.sprites.other["official-artwork"].front_default}"
-                class="card-img-top imagen-pokemon"
-                alt="${pokemon.name}"
-            >
-
-            <div class="card-body text-center">
-
-                <h5 class="card-title nombre-pokemon">
-                    #${pokemon.id} ${pokemon.name}
-                </h5>
-
-                <div class="mb-3">
-                    ${tipos}
-                </div>
-
-                <button
-                    class="btn btn-danger"
-                    onclick="mostrarInformacionPokemon(${pokemon.id})"
-                >
-                    Ver más
-                </button>
-
-            </div>
-
-        </div>
-
-    `;
-
-    listaPokemon.appendChild(columna);
-}
-
-
-// Mostrar información completa
-async function mostrarInformacionPokemon(id) {
-
-    mostrarSpinner();
-
-    try {
-
-        const respuesta = await fetch(
-            `https://pokeapi.co/api/v2/pokemon/${id}`
-        );
-
-        if (!respuesta.ok) {
-            throw new Error("Error al obtener información");
-        }
-
-        const pokemon = await respuesta.json();
-
-        modalTitulo.textContent =
-            `#${pokemon.id} ${pokemon.name}`;
-
-
-        // Tipos
-        const tipos = pokemon.types.map(function (tipo) {
+            const nombreTipo = tipo.type.name;
+            const color = coloresTipos[nombreTipo] || "#777";
 
             return `
-                <span class="tipo">
-                    ${tipo.type.name}
+                <span class="tipo" style="background-color: ${color}">
+                    ${nombreTipo}
                 </span>
             `;
 
         }).join("");
 
+        const tarjeta = document.createElement("div");
 
-        // Habilidades
-        const habilidades = pokemon.abilities.map(function (habilidad) {
+        tarjeta.className = "col-12 col-sm-6 col-md-4 col-lg-3";
 
-            return `
-                <div class="habilidad">
-                    ${habilidad.ability.name}
-                </div>
-            `;
+        tarjeta.innerHTML = `
 
-        }).join("");
-
-
-        // Movimientos
-        const movimientos = pokemon.moves
-            .slice(0, 4)
-            .map(function (movimiento) {
-
-                return `
-                    <li class="list-group-item text-capitalize">
-                        ${movimiento.move.name}
-                    </li>
-                `;
-
-            }).join("");
-
-
-        modalContenido.innerHTML = `
-
-            <div class="text-center">
+            <div class="tarjeta-pokemon">
 
                 <img
-                    src="${pokemon.sprites.other["official-artwork"].front_default}"
-                    class="modal-imagen"
+                    src="${pokemon.sprites.other['official-artwork'].front_default || pokemon.sprites.front_default}"
                     alt="${pokemon.name}"
+                    loading="lazy"
                 >
 
-                <h3 class="text-capitalize mt-3">
-                    ${pokemon.name}
-                </h3>
+                <h5>${pokemon.name}</h5>
 
                 <p>
-                    <strong>Altura:</strong>
-                    ${pokemon.height / 10} m
+                    N.º ${String(pokemon.id).padStart(3, "0")}
                 </p>
 
-                <p>
-                    <strong>Peso:</strong>
-                    ${pokemon.weight / 10} kg
-                </p>
-
-                <h5>Tipos</h5>
-
-                <div class="mb-4">
+                <div>
                     ${tipos}
                 </div>
 
-                <h5>Habilidades</h5>
+                <button
+                    class="btn btn-danger mt-3"
+                    onclick="verInformacion(${pokemon.id})">
 
-                <div class="mb-4">
-                    ${habilidades}
-                </div>
+                    Ver más información
 
-                <h5>Movimientos</h5>
-
-                <ul class="list-group lista-movimientos">
-                    ${movimientos}
-                </ul>
+                </button>
 
             </div>
 
         `;
 
-        modalPokemon.show();
+        contenedor.appendChild(tarjeta);
+
+    });
+
+}
+
+
+// ==========================================
+// VER INFORMACION DE UN POKEMON
+// ==========================================
+
+function verInformacion(id) {
+
+    const pokemon = pokemonCargados.find(
+        p => p.id === id
+    );
+
+    if (!pokemon) return;
+
+    const imagen =
+        pokemon.sprites.other['official-artwork'].front_default ||
+        pokemon.sprites.front_default;
+
+    // Obtener habilidades
+    const habilidades = pokemon.abilities.map(habilidad => {
+
+        return habilidad.ability.name;
+
+    }).join(", ");
+
+    // Obtener los primeros cuatro movimientos
+    const movimientos = pokemon.moves
+        .slice(0, 4)
+        .map(movimiento => {
+
+            return `<li>${movimiento.move.name}</li>`;
+
+        }).join("");
+
+    const tipos = pokemon.types.map(tipo => {
+
+        return tipo.type.name;
+
+    }).join(", ");
+
+    const contenido = document.getElementById("modal-contenido");
+
+    contenido.innerHTML = `
+
+        <img src="${imagen}" alt="${pokemon.name}">
+
+        <h4>${pokemon.name}</h4>
+
+        <p><strong>Número:</strong> ${pokemon.id}</p>
+
+        <p><strong>Tipos:</strong> ${tipos}</p>
+
+        <p><strong>Altura:</strong> ${pokemon.height / 10} metros</p>
+
+        <p><strong>Peso:</strong> ${pokemon.weight / 10} kg</p>
+
+        <hr>
+
+        <h5>Habilidades</h5>
+
+        <p>${habilidades}</p>
+
+        <hr>
+
+        <h5>Primeros cuatro movimientos</h5>
+
+        <ul class="lista-movimientos">
+            ${movimientos}
+        </ul>
+
+    `;
+
+    document.getElementById("modal-titulo").textContent =
+        "Información de " + pokemon.name;
+
+    const modal = new bootstrap.Modal(
+        document.getElementById("modalPokemon")
+    );
+
+    modal.show();
+
+}
+
+
+// ==========================================
+// CARGAR MAS POKEMON
+// ==========================================
+
+async function cargarMasPokemon() {
+
+    if (cargando) return;
+
+    cargando = true;
+    botonMas.disabled = true;
+    mostrarSpinner();
+
+    const nuevosPokemon = [];
+
+    try {
+
+        const respuesta = await fetch(
+            `${API_URL}?limit=20&offset=${pokemonCargados.length}`
+        );
+
+        if (!respuesta.ok) {
+            throw new Error("No se pudieron cargar más Pokémon");
+        }
+
+        const datos = await respuesta.json();
+
+        const resultados = await Promise.all(
+            datos.results.map(async pokemon => {
+
+                const respuestaPokemon = await fetch(pokemon.url);
+
+                if (!respuestaPokemon.ok) {
+                    throw new Error("Error al obtener un Pokémon");
+                }
+
+                return await respuestaPokemon.json();
+
+            })
+        );
+
+        nuevosPokemon.push(...resultados);
+
+        pokemonCargados.push(...nuevosPokemon);
+
+        // Mostrar todos los Pokémon cargados
+        mostrarPokemon(pokemonCargados);
+
+        // Actualizar el buscador
+        buscador.value = "";
 
     } catch (error) {
 
         console.error(error);
 
-        modalContenido.innerHTML = `
-            <div class="alert alert-danger">
-                No se pudo cargar la información del Pokémon.
-            </div>
-        `;
+        mensajeError.textContent =
+            "No se pudieron cargar más Pokémon. Intentá nuevamente.";
 
-        modalPokemon.show();
+        mensajeError.classList.remove("d-none");
 
     } finally {
 
         ocultarSpinner();
+        cargando = false;
+
+        botonMas.disabled = false;
+
     }
+
 }
 
 
-// Cargar más Pokémon
-btnCargarMas.addEventListener("click", function () {
+// ==========================================
+// BUSCADOR DE POKEMON
+// ==========================================
 
-    cantidadPokemon = 20;
+buscador.addEventListener("input", function() {
 
-    obtenerPokemon();
+    const texto = buscador.value.toLowerCase().trim();
+
+    const filtrados = pokemonCargados.filter(pokemon => {
+
+        return pokemon.name.includes(texto) ||
+            String(pokemon.id) === texto;
+
+    });
+
+    mostrarPokemon(filtrados);
+
+    // Ocultar botón mientras se busca
+    if (texto !== "") {
+
+        botonMas.classList.add("d-none");
+
+    } else {
+
+        botonMas.classList.remove("d-none");
+
+    }
 
 });
 
 
-// Cargar los primeros 151 al iniciar
-obtenerPokemon();
+// ==========================================
+// EVENTO DEL BOTON CARGAR MAS
+// ==========================================
+
+botonMas.addEventListener("click", cargarMasPokemon);
+
+
+// ==========================================
+// INICIAR APLICACION
+// ==========================================
+
+cargarPokemon();
